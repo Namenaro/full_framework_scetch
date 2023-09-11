@@ -45,6 +45,18 @@ class DataWrapper:
         coords = [self.half_len_cycle + 1] * len(sitation_signals)
         return sitation_signals, coords
 
+    def get_corrupted_places_situations(self, num_situations=None):
+        full_healthy_signals = self._get_test_ECGS(num_cases=None)
+        sitation_signals = []
+        for full_signal in full_healthy_signals:
+            new_signals = self._get_situations_from_full_signal(full_signal, num_situations=56)
+            sitation_signals = sitation_signals + new_signals[-4:]
+            if num_situations is not None:
+                if len(sitation_signals) >= num_situations:
+                    break
+
+        coords = [self.half_len_cycle + 1] * len(sitation_signals)
+        return sitation_signals, coords
 
 
     #------------------------------------------------------------
@@ -117,6 +129,16 @@ if __name__ == "__main__":
 
     log = HtmlLogger("un_healthy_situations")
     signals, coords = dw.get_contrast_situations(num_situations=4)
+    for i in range(len(signals)):
+        signal = signals[i]
+        coord = coords[i]
+        fig, ax = plt.subplots()
+        draw_ECG(ax, signal)
+        draw_vertical_line(ax, x=coord, y=max(signal))
+        log.add_fig(fig)
+
+    log = HtmlLogger("corrupted_situations")
+    signals, coords = dw.get_corrupted_places_situations(num_situations=4)
     for i in range(len(signals)):
         signal = signals[i]
         coord = coords[i]
